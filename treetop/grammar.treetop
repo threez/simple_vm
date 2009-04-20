@@ -1,0 +1,88 @@
+grammar SimpleLanguage
+  rule program
+    spaces 
+		'declarations' spaces (declarations)* spaces 
+		'begin' spaces commands spaces 
+		'end'
+		spaces <ProgramNode>
+  end
+  
+  rule declarations
+    'integer' spaces id_seq spaces identifier spaces '.' <DeclarationNode>
+  end
+  
+  rule id_seq
+    (identifier spaces ',' spaces)+ <IdentifierSequenceNode>
+  end
+  
+  rule commands
+  	(command spaces ';' spaces)+ <CommandSequenceNode>
+  end
+  
+  rule assignment
+    identifier spaces ':=' spaces math_expression <AssignmentNode>
+  end
+
+	rule if_then_else_condition
+    'if' spaces expression spaces 
+		'then' spaces then_commands:commands spaces
+		'else' spaces else_commands:commands spaces
+		'fi' <IfThenElseConditionNode>
+	end
+  
+  rule if_then_condition
+    'if' spaces expression spaces 
+		'then' spaces commands spaces 
+		'fi' <IfThenConditionNode>
+  end
+
+	rule condition
+		if_then_else_condition / if_then_condition
+	end
+  
+  rule while_loop
+    'while' spaces expression spaces 
+		'do' spaces commands spaces 
+		'od' <WhileNode>
+  end
+  
+  rule command
+    'skip' <ReadCommandNode> / 
+		'read' spaces identifier <ReadCommandNode> / 
+		'write' spaces math_expression <WriteCommandNode> / 
+		assignment / 
+		condition / 
+		while_loop
+  end
+
+	rule spaces
+		[\s]* <SpacesNode>
+	end
+  
+  rule number
+    '0' <NumberNode> / 
+		[1-9] [0-9]* <NumberNode> 
+  end
+  
+  rule identifier
+    [a-zA-Z] [a-zA-Z_]* <IdentifierNode>
+  end
+
+	rule math_expression
+		term (spaces additive:[+-] spaces term)* <MathExpressionNode>
+	end
+	
+	rule term
+		factor (spaces multitive:[*/] spaces factor)* <TermNode>
+	end
+	
+	rule factor
+  	number / 
+		identifier  / 
+		'(' spaces math_expression spaces ')' <FactorNode>
+	end
+
+  rule expression
+		first_expression:math_expression spaces [<=>] spaces second_expression:math_expression <ExpressionNode>
+  end
+end
