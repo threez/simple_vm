@@ -7,57 +7,121 @@ describe VirtualMachine do
   
   it "should compute a simple multipication" do
     @vm.in "12\n", "23\n"
-    @vm.compute [
-      [:READ_INT, :m1],
-      [:READ_INT, :m2],
-      [:LD_VAR, :m1],
-      [:LD_VAR, :m2],
+    @vm.compute([
+      [:DATA, 2],
+      [:READ_INT],
+      [:STORE, 1],
+      [:READ_INT],
+      [:STORE, 2],
+      [:LD_VAR, 1],
+      [:LD_VAR, 2],
       [:MULT],
-      [:WRITE_INT]
-    ]
-    @vm.out.should == 276
+      [:LD_INT, 12],
+      [:DIV],
+      [:WRITE_INT],
+      [:HALT, 0]
+    ]).should == 0
+    @vm.out.should == 23
   end
   
   it "should compute basic math operations" do
     @vm.in "12\n", "20\n"
-    @vm.compute [
-      [:READ_INT, :m1],
-      [:READ_INT, :m2],
-      [:LD_VAR, :m1],
-      [:LD_VAR, :m2],
+    @vm.compute([
+      [:DATA, 2],
+      [:READ_INT],
+      [:STORE, 1],
+      [:READ_INT],
+      [:STORE, 2],
+      [:LD_VAR, 1],
+      [:LD_VAR, 2],
       [:SUB],
-      [:WRITE_INT]
+      [:LD_INT, 10],
+      [:ADD],
+      [:WRITE_INT],
+      [:HALT, 1]
+    ]).should == 1
+    @vm.out.should == 2
+  end
+  
+  it "should compute advanced math operations" do
+    @vm.compute [
+      [:LD_INT, 3],
+      [:LD_INT, 2],
+      [:PWR],
+      [:LD_INT, 3],
+      [:PWR],
+      [:WRITE_INT],
+      [:HALT, 0]
+    ]
+    @vm.out.should == 729
+  end
+  
+  it "should have a correct program flow using GOTO" do
+    @vm.in "12\n", "20\n"
+    @vm.compute [
+      [:DATA, 2],
+      [:READ_INT],
+      [:STORE, 1],
+      [:READ_INT],
+      [:STORE, 2],
+      [:LD_VAR, 1],
+      [:LD_VAR, 2],
+      [:GOTO, 9], # skip mult
+      [:MULT],
+      [:SUB],
+      [:WRITE_INT],
+      [:HALT, 0]
     ]
     @vm.out.should == -8
+  end
+  
+  it "should have a correct program flow using JMP_FALSE" do
+    @vm.in "12\n", "20\n"
+    @vm.compute [
+      [:LD_INT, 10], # first multipier
+      [:LD_INT, 2],
+      [:LD_INT, 3],
+      [:LT],
+      [:JMP_FALSE, 7],
+      [:LD_INT, 30], # second multipier
+      [:MULT],
+      [:WRITE_INT],
+      [:HALT, 0]
+    ]
+    @vm.out.should == 300
   end
 
   it "should compute a whole program" do
     @vm.in "10"
     @vm.compute [
-      [:READ_INT, :n],  # 0
-      [:LD_VAR, :n],    # 1
-      [:LD_INT, 0],     # 2
-      [:LT],            # 3
-      [:JMP_FALSE, 6],  # 4
-      [:LD_INT, 0],     # 5
-      [:WRITE_INT],     # 6
-      [:LD_INT, 1],     # 7
-      [:STORE, :f],     # 8
-      [:LD_VAR, :n],    # 9
-      [:LD_INT, 0],     # 10
-      [:GT],            # 11
-      [:JMP_FALSE, 21], # 12
-      [:LD_VAR, :f],    # 13
-      [:LD_VAR, :n],    # 14
-      [:MULT],          # 15
-      [:STORE, :f],     # 16
-      [:LD_VAR, :n],    # 17
-      [:LD_INT, 1],     # 18
-      [:SUB],           # 19
-      [:STORE, :n],     # 20
-      [:GOTO, 8],       # 21
-      [:LD_VAR, :f],    # 22
-      [:WRITE_INT]      # 23
+      [:DATA, 2],
+      [:READ_INT],
+      [:STORE, 1],
+      [:LD_VAR, 1],
+      [:LD_INT, 0],
+      [:LT],
+      [:JMP_FALSE, 10],
+      [:LD_INT, 0],
+      [:WRITE_INT],
+      [:GOTO, 25],
+      [:LD_INT, 1],
+      [:STORE, 2],
+      [:LD_VAR, 1],
+      [:LD_INT, 0],
+      [:GT],
+      [:JMP_FALSE, 25],
+      [:LD_VAR, 2],
+      [:LD_VAR, 1],
+      [:MULT],
+      [:STORE, 2],
+      [:LD_VAR, 1],
+      [:LD_INT, 1],
+      [:SUB],
+      [:STORE, 1],
+      [:GOTO, 12],
+      [:LD_VAR, 2],
+      [:WRITE_INT],
+      [:HALT, 0]
     ]
 
     # same alg. in ruby:

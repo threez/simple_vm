@@ -1,23 +1,46 @@
+class VirtualMachineException < StandardError
+  attr_accessor :vm, :code, :instuction_pointer
+  
+  def message
+    "#{super}\n" \
+    "  Stack: #{@vm.stack.inspect}\n" \
+    "  Variables: #{@vm.variables.inspect}\n" \
+    "  InstuctionPointer: #{@instuction_pointer} [#{@code[@instuction_pointer].inspect}]\n" \
+  end
+end
+
 class VirtualMachine
+  attr_reader :stack, :variables
   
   def initialize(options = {})
     @debug = options[:debug] || false
     @stack = []
-    @varstore = {}
+    @variables = {}
     @halt = false
+    @exit_value = nil
   end
   
-  def compute(operations)
-    @code = operations
-    @instuction_pointer = 0
-    while @instuction_pointer < @code.size and @halt == false
-      operation, argument = @code[@instuction_pointer]
-      compute_operation(operation, argument)
-      @instuction_pointer += 1
+  def compute(code)
+    instuction_pointer = 0
+    while instuction_pointer < code.size and @halt == false
+      if new_instruction_pointer = compute_operation(*code[instuction_pointer])
+        instuction_pointer = new_instruction_pointer
+      else 
+        instuction_pointer += 1
+      end
     end
+    
+    @exit_value
+  rescue => ex
+    ex.code = code
+    ex.vm = self
+    ex.instuction_pointer = instuction_pointer
+    raise ex
   end
   
-  def compute_operation(operation, argument)
+  def compute_operation(operation, argument = nil)
+    new_instruction_pointer = nil
+    
     if @debug
       puts "== OP: #{operation}(#{argument}):"
       puts " * BEFORE: "
@@ -25,24 +48,27 @@ class VirtualMachine
     end
     
     case operation
+      when :DATA
+        # this operation don't affect this vm because variabels are stored in a hash
       when :HALT # Stop execution
         @halt = true
+        @exit_value = argument
       when :READ_INT # Read an integer from the keyboard and store it at the address var
-        @varstore[argument] = self.input()
+        @stack << self.input()
       when :WRITE_INT # Output the top of the stack and decrement SP
         self.output(stack_last)
       when :STORE # Store the top of the stack at the address var and decrement SP 
-        @varstore[argument] = stack_last
+        @variables[argument] = stack_last
       when :JMP_FALSE # If the top of the stack is 0 then jump to label ; decrement SP anyway 
         if stack_last == 0
-          @instuction_pointer = argument
+          new_instruction_pointer = argument
         end
       when :GOTO # Jump to label
-        @instuction_pointer = argument
+        new_instruction_pointer = argument
       when :LD_INT # Put integer on the stack 
         @stack << argument
       when :LD_VAR # Put the value at the address var on the stack
-        @stack << @varstore[argument]
+        @stack << @variables[argument]
         
       # Operators <, =, >, +, -, ×, ÷, ˆ. Perform 
       # the operation on the two top elements 
@@ -73,7 +99,7 @@ class VirtualMachine
         b, a = stack_last, stack_last
         @stack << a ** b
       else
-        raise "Unknown operation #{operation}"
+        raise VirtualMachineException.new("Unknown operation #{operation}!")
     end
     
     if @debug
@@ -81,6 +107,8 @@ class VirtualMachine
       puts info
       puts "== END"
     end
+    
+    return new_instruction_pointer
   end
   
 private
@@ -95,17 +123,9 @@ private
     gets.to_i
   end
   
-  # prints information about the vm
-  def info
-    "    Stack: #{@stack.inspect}\n" \
-    "    VarStore: #{@varstore.inspect}\n" \
-    "    InstuctionPointer: #{@instuction_pointer} [#{@code[@instuction_pointer].inspect}]\n" \
-    "    Labels: #{@labels.inspect}"
-  end
-  
   def stack_last
-    last_element = @stack.pop
-    raise "Stack is empty\n#{info}" if last_element.nil?
-    last_element
+    item = @stack.pop
+    raise VirtualMachineException.new("Stack is empty!") unless item
+    item
   end
 end
