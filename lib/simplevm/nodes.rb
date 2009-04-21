@@ -8,17 +8,20 @@ end
 
 class ProgramNode < Treetop::Runtime::SyntaxNode
   def instructions(inst_set = InstructionsBuilder.new)
-    commands.instructions(inst_set)
+    #commands.instructions(inst_set)
+    super(inst_set)
+    inst_set << [:HALT, 0]
     inst_set
   end
 end
 
 class DeclarationNode < Treetop::Runtime::SyntaxNode
-  # FIXME: not needed through the dynamic vm
 end
 
 class IdentifierSequenceNode < Treetop::Runtime::SyntaxNode
-  # FIXME: not needed through the dynamic vm
+  def instructions(inst_set)
+    inst_set << [:DATA, 2]
+  end
 end
 
 class CommandSequenceNode < Treetop::Runtime::SyntaxNode
@@ -27,7 +30,7 @@ end
 class AssignmentNode < Treetop::Runtime::SyntaxNode
   def instructions(inst_set)
     math_expression.instructions(inst_set)
-    inst_set << [:STORE, identifier.text_value]
+    inst_set << [:STORE, inst_set.variable_register(identifier.text_value)]
   end
 end
 
@@ -66,7 +69,8 @@ end
 
 class ReadCommandNode < Treetop::Runtime::SyntaxNode
   def instructions(inst_set)
-    inst_set << [:READ_INT, identifier.text_value.to_sym]
+    inst_set << [:READ_INT]
+    inst_set << [:STORE, inst_set.variable_register(identifier.text_value)]
   end
 end
 
@@ -96,7 +100,7 @@ end
 class TermNode < Treetop::Runtime::SyntaxNode
   def instructions(inst_set)
     elements[0].instructions(inst_set)
-    pp elements
+    p elements
     puts "====== END TERM ======"
     if respond_to? :additive
       case additive.text_value
@@ -124,7 +128,7 @@ end
 
 class IdentifierNode < Treetop::Runtime::SyntaxNode
   def instructions(inst_set)
-    inst_set << [:LD_VAR, text_value.to_sym]
+    inst_set << [:LD_VAR, inst_set.variable_register(text_value)]
   end
 end 
 
