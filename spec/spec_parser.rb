@@ -9,5 +9,3 @@ describe SimpleLanguageParser do
     @parser.parse(SAMPLE_CODE).class.should == ProgramNode
   end
 end
-
-
