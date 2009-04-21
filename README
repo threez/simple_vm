@@ -1,0 +1,18 @@
+= SimpleVM
+
+This project is a simple virtual machine implementation to learn more about
+implementing virtual machines.
+
+The project
+  
+== Architecture
+
+The virtual machine is implemented as a stack-full vm that has an additional
+ram to store variable values.
+  
+ 
+  
+  
+== Byte code
+
+
