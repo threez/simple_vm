@@ -1,35 +1,46 @@
 class Treetop::Runtime::SyntaxNode
   def instructions(inst_set)
     elements.each do |node|
-      node.instructions(inst_set) if !node.kind_of?(SpacesNode)
+      node.instructions(inst_set)
     end if elements
   end
 end
 
 class ProgramNode < Treetop::Runtime::SyntaxNode
   def instructions(inst_set = InstructionsBuilder.new)
-    #commands.instructions(inst_set)
-    super(inst_set)
+    if declarations
+      declarations.instructions(inst_set)
+      inst_set << inst_set.data_instruction
+    end
+    commands.instructions(inst_set)
     inst_set << [:HALT, 0]
     inst_set
   end
 end
 
 class DeclarationNode < Treetop::Runtime::SyntaxNode
-end
-
-class IdentifierSequenceNode < Treetop::Runtime::SyntaxNode
   def instructions(inst_set)
-    inst_set << [:DATA, 2]
+    id_seq.all_identifiers.each do |identifier|
+      inst_set.declare_variable(type.text_value, identifier.text_value)
+    end if id_seq.all_identifiers
   end
 end
 
-class CommandSequenceNode < Treetop::Runtime::SyntaxNode
+class IdentifierSequenceNode < Treetop::Runtime::SyntaxNode
+  def all_identifiers(list = [])
+    list << identifier
+    if id_seq and id_seq.kind_of? IdentifierSequenceNode
+      id_seq.all_identifiers(list)
+    elsif id_seq
+      list << id_seq # last identifier
+    end
+    list
+  end
 end
 
 class AssignmentNode < Treetop::Runtime::SyntaxNode
   def instructions(inst_set)
-    math_expression.instructions(inst_set)
+    additive.instructions(inst_set)
     inst_set << [:STORE, inst_set.variable_register(identifier.text_value)]
   end
 end
@@ -52,7 +63,7 @@ class IfThenElseConditionNode < Treetop::Runtime::SyntaxNode
       inst_set << end_pos
     end
     else_commands.instructions(inst_set)
-    end_pos[1] = inst_set.icounter
+      end_pos[1] = inst_set.icounter # set correct goto position (behind else)
   end
 end
 
@@ -76,7 +87,7 @@ end
 
 class WriteCommandNode < Treetop::Runtime::SyntaxNode
   def instructions(inst_set)
-    math_expression.instructions(inst_set)
+    additive.instructions(inst_set)
     inst_set << [:WRITE_INT]
   end
 end
@@ -87,23 +98,18 @@ class SkipCommandNode < Treetop::Runtime::SyntaxNode
   end
 end
 
-class SpacesNode < Treetop::Runtime::SyntaxNode
-end
-
-class MathExpressionNode < Treetop::Runtime::SyntaxNode
+class ExitCommandNode < Treetop::Runtime::SyntaxNode
   def instructions(inst_set)
-    elements[0].instructions(inst_set)
-    elements[1].instructions(inst_set)
+    inst_set << [:HALT, number.to_i]
   end
 end
 
-class TermNode < Treetop::Runtime::SyntaxNode
+class AdditiveNode < Treetop::Runtime::SyntaxNode
   def instructions(inst_set)
-    elements[0].instructions(inst_set)
-    p elements
-    puts "====== END TERM ======"
-    if respond_to? :additive
-      case additive.text_value
+    multitive.instructions(inst_set)
+    if additive
+      additive.instructions(inst_set)
+      case operator.text_value
       when "+"
         inst_set << [:ADD]
       when "-"
@@ -113,10 +119,20 @@ class TermNode < Treetop::Runtime::SyntaxNode
   end
 end
 
-class FactorNode < Treetop::Runtime::SyntaxNode
+class MultitiveNode < Treetop::Runtime::SyntaxNode
   def instructions(inst_set)
-    pp elements
-    puts "====== END FACTOR ======"
+    primary.instructions(inst_set)
+    if multitive
+      multitive.instructions(inst_set)
+      case operator.text_value
+      when "*"
+        inst_set << [:MULT]
+      when "/"
+        inst_set << [:DIV]
+      when "^"
+        inst_set << [:PWR]
+      end
+    end
   end
 end
 
