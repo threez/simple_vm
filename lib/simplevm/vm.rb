@@ -49,31 +49,27 @@ class VirtualMachine
     
     case operation
       when :DATA
-        # this operation don't affect this vm because variabels are stored in a hash
-      when :HALT # Stop execution
+        # this operation don't affect this vm,
+        # because variabels are stored in a hash
+      when :HALT
         @halt = true
         @exit_value = argument
-      when :READ_INT # Read an integer from the keyboard and store it at the address var
+      when :READ_INT
         @stack << self.input()
-      when :WRITE_INT # Output the top of the stack and decrement SP
+      when :WRITE_INT
         self.output(stack_last)
-      when :STORE # Store the top of the stack at the address var and decrement SP 
+      when :STORE
         @variables[argument] = stack_last
-      when :JMP_FALSE # If the top of the stack is 0 then jump to label ; decrement SP anyway 
+      when :JMP_FALSE
         if stack_last == 0
           new_instruction_pointer = argument
         end
-      when :GOTO # Jump to label
+      when :GOTO
         new_instruction_pointer = argument
-      when :LD_INT # Put integer on the stack 
+      when :LD_INT
         @stack << argument
-      when :LD_VAR # Put the value at the address var on the stack
+      when :LD_VAR
         @stack << @variables[argument]
-        
-      # Operators <, =, >, +, -, ×, ÷, ˆ. Perform 
-      # the operation on the two top elements 
-      # of the stack, remove them, and put the 
-      # result on the stack 
       when :LT
         b, a = stack_last, stack_last
         @stack << (a < b ? 1 : 0)
