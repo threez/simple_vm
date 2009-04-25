@@ -1,39 +1,40 @@
 grammar SimpleLanguage
   rule program
     spaces 
-		'declarations' spaces (declarations)* spaces 
+		'declarations' spaces declarations:declarations? spaces 
 		'begin' spaces commands spaces 
 		'end'
 		spaces <ProgramNode>
   end
   
   rule declarations
-    'integer' spaces id_seq spaces identifier spaces '.' <DeclarationNode>
+    type:'integer' spaces id_seq spaces '.' <DeclarationNode>
   end
   
   rule id_seq
-    (identifier spaces ',' spaces)+ <IdentifierSequenceNode>
+    identifier spaces ',' spaces id_seq <IdentifierSequenceNode> / 
+    identifier
   end
   
   rule commands
-  	(command spaces ';' spaces)+ <CommandSequenceNode>
+    (command spaces ';' spaces)+
   end
   
   rule assignment
-    identifier spaces ':=' spaces math_expression <AssignmentNode>
+    identifier spaces ':=' spaces additive <AssignmentNode>
   end
 
 	rule if_then_else_condition
     'if' spaces expression spaces 
-		'then' spaces then_commands:commands spaces
+		'then'? spaces then_commands:commands spaces
 		'else' spaces else_commands:commands spaces
-		'fi' <IfThenElseConditionNode>
+		'end' <IfThenElseConditionNode>
 	end
   
   rule if_then_condition
     'if' spaces expression spaces 
-		'then' spaces commands spaces 
-		'fi' <IfThenConditionNode>
+		'then'? spaces commands spaces 
+		'end' <IfThenConditionNode>
   end
 
 	rule condition
@@ -42,21 +43,22 @@ grammar SimpleLanguage
   
   rule while_loop
     'while' spaces expression spaces 
-		'do' spaces commands spaces 
-		'od' <WhileNode>
+		'do'? spaces commands spaces 
+		'end' <WhileNode>
   end
   
   rule command
     'skip' <ReadCommandNode> / 
 		'read' spaces identifier <ReadCommandNode> / 
-		'write' spaces math_expression <WriteCommandNode> / 
+		'write' spaces additive <WriteCommandNode> / 
+		'exit' spaces number <ExitCommandNode> / 
 		assignment / 
 		condition / 
 		while_loop
   end
 
 	rule spaces
-		[\s]* <SpacesNode>
+		[\s]*
 	end
   
   rule number
@@ -65,24 +67,24 @@ grammar SimpleLanguage
   end
   
   rule identifier
-    [a-zA-Z] [a-zA-Z_]* <IdentifierNode>
+    [a-zA-Z] [a-zA-Z_0-9]* <IdentifierNode>
   end
 
-	rule math_expression
-		term (spaces additive:[+-] spaces term)* <MathExpressionNode>
-	end
-	
-	rule term
-		factor (spaces multitive:[*/] spaces factor)* <TermNode>
-	end
-	
-	rule factor
-  	number / 
-		identifier  / 
-		'(' spaces math_expression spaces ')' <FactorNode>
-	end
+  rule additive
+    multitive spaces operator:[+-] spaces additive <AdditiveNode> / 
+    multitive
+  end
+
+  rule multitive
+    primary spaces operator:[*/] spaces multitive <MultitiveNode> /
+    primary 
+  end
+
+  rule primary
+    '(' spaces additive spaces ')' / number / identifier
+  end
 
   rule expression
-		first_expression:math_expression spaces [<=>] spaces second_expression:math_expression <ExpressionNode>
+		first_expression:additive spaces [<=>] spaces second_expression:additive <ExpressionNode>
   end
 end
