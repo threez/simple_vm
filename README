@@ -1,18 +1,193 @@
 = SimpleVM
 
 This project is a simple virtual machine implementation to learn more about
-implementing virtual machines.
-
-The project
+implementing virtual machines and programming languages.
   
 == Architecture
 
 The virtual machine is implemented as a stack-full vm that has an additional
-ram to store variable values.
+ram to store variable values that are addressable by 32 bit integers.
+
+== Virtual Machine Instruction Set
+
+The vm has a simple instruction set that can read and write integers and 
+simple math and program flow mechanisms.
+
+=== [DATA, argument]
+
+argument: 32 bit integer
+
+stack: no changes
+
+This operation declares the count + 1 of used variables in the vm. E. g. 
+[DATA, 3] would reserve 3 variables with the addresses 1, 2, 3. The address
+0 is a special address that will be used for jumping in the future.
+
+=== [HALT, argument]
+
+argument: 8 bit integer
+
+stack: no changes
+
+THis operation stops the execution of the vm immediately with return code
+that is specified by argument.
   
- 
+=== [READ_INT]
+
+argument: %
+
+stack:
+  before: []
+  after: [integer]
+
+This operation reads an 32 bit integer from the stdin device and pushes it
+to the stack.
   
+=== [WRITE_INT]
+
+argument: %
   
-== Byte code
+stack:
+  before: [integer]
+  after: []
+  
+This operation pops a 32 bit integer from the stack and outputs it to the
+stdout device
+
+=== [STORE, argument]
+
+argument: 32 bit integer address of the variable
+
+stack:
+  before: [integer]
+  after: []
+  
+This operation pops a 32 bit integer value from the stack and stores it in the
+variable space that is passed (argument).
+
+=== [JMP_FALSE, argument]
+
+argument: 32 bit integer address of the new instruction pointer position
+  
+stack:
+  before: [integer]
+  after: []
+  
+This operation pops a 32 bit integer value from the stack and checks it. If the
+value is equal to 0 the vm will jump to the new instruction pointer that was 
+passed with the operation, otherwise it will ignore the jump.
+
+=== [GOTO, argument]
+
+argument: 32 bit integer address of the new instruction pointer position
+
+stack: no changes
+
+This operation moves the instruction pointer to the passed position.
+
+=== [LD_INT, argument] # Put integer on the stack
+
+argument: 32 bit integer value
+
+stack:
+  before: []
+  after: [integer]
+
+This operation pushes a 32 bit integer value onto the stack and
+
+=== [LD_VAR, argument]
+
+argument: 32 bit integer address
+
+stack:
+  before: []
+  after: [integer]
+
+Put the value at the address on the stack.
+
+=== [LT]
+
+argument: %
+
+stack:
+  before: [integer2, integer1]
+  after: [integer]
+  
+Checks if the integer1 is lower than integer2 and pushes a 1 to the stack if
+the expression is true or a 0 if it is false.
+
+=== [EQ]
+
+argument: %
+
+stack:
+  before: [integer2, integer1]
+  after: [integer]
+  
+Checks if the integer1 is equal to integer2 and pushes a 1 to the stack if
+the expression is true or a 0 if it is false.
+
+=== [GT]
+
+argument: %
+
+stack:
+  before: [integer2, integer1]
+  after: [integer]
+  
+Checks if the integer1 is grater then integer2 and pushes a 1 to the stack if
+the expression is true or a 0 if it is false.
+
+=== [ADD]
+
+argument: %
+
+stack:
+  before: [integer2, integer1]
+  after: [integer]
+  
+Adds the integer1 and integer2 and pushes the result onto the stack.
+
+=== [SUB]
+
+argument: %
+
+stack:
+  before: [integer2, integer1]
+  after: [integer]
+  
+Substracts the integer1 and integer2 (integer1 - integer2) and pushes the 
+result onto the stack.
+
+=== [MULT]
+
+argument: %
+
+stack:
+  before: [integer2, integer1]
+  after: [integer]
+  
+Multiply the integer1 and integer2 and pushes the result onto the stack.
+
+=== [DIV]
+
+argument: %
+
+stack:
+  before: [integer2, integer1]
+  after: [integer]
+  
+Adds the integer1 and integer2 and pushes the result onto the stack.
+
+=== [PWR]
+
+argument: %
+
+stack:
+  before: [integer2, integer1]
+  after: [integer]
+  
+Powers the integer1 by the value of integer2 and pushes the result onto the 
+stack.
 
 
