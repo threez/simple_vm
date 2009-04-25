@@ -131,7 +131,7 @@ int main(int argc, char* argv[]) {
           break;
         case HALT:
           halt = program[program_pointer].argument;
-          //free(variables);
+          free(variables);
           break;
         case READ_INT:
           scanf("%i", &argument);

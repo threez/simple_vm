@@ -14,14 +14,21 @@ Spec::Rake::SpecTask.new do |t|
   t.spec_files = FileList['spec/spec*.rb']
 end
 
-desc "compile samples"
-task :compile_samples do
-  require "spec/spec_helper"
-  
-  Dir["spec/*.sl"].each do |slfile|
-    code = File.read(slfile)    
-    File.open(File.basename(slfile) + "c", "w") do |f|
-      f.write ByteCodeCompiler.compile(code)
+namespace :compile do
+  desc "compile samples"
+  task :samples do
+    require "spec/spec_helper"
+
+    Dir["spec/*.sl"].each do |slfile|
+      code = File.read(slfile)    
+      File.open(File.basename(slfile) + "c", "w") do |f|
+        f.write ByteCodeCompiler.compile(code)
+      end
     end
+  end
+
+  desc "compile the c vm"
+  task :vm do
+    sh "gcc src/slvm.c -W -O2 -o slvm"
   end
 end
