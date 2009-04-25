@@ -103,7 +103,7 @@ describe VirtualMachine do
       [:JMP_FALSE, 10],
       [:LD_INT, 0],
       [:WRITE_INT],
-      [:GOTO, 25],
+      [:GOTO, 27],
       [:LD_INT, 1],
       [:STORE, 2],
       [:LD_VAR, 1],
