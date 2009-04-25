@@ -5,13 +5,11 @@ implementing virtual machines and programming languages.
   
 == Architecture
 
-The virtual machine is implemented as a stack-full vm that has an additional
-ram to store variable values that are addressable by 32 bit integers.
+The virtual machine is implemented as a stack-full vm that has an additional ram to store variable values that are addressable by 32 bit integers.
 
 == Virtual Machine Instruction Set
 
-The vm has a simple instruction set that can read and write integers and 
-simple math and program flow mechanisms.
+The vm has a simple instruction set that can read and write integers and simple math and program flow mechanisms.
 
 === [DATA, argument]
 
@@ -19,9 +17,7 @@ argument: 32 bit integer
 
 stack: no changes
 
-This operation declares the count + 1 of used variables in the vm. E. g. 
-[DATA, 3] would reserve 3 variables with the addresses 1, 2, 3. The address
-0 is a special address that will be used for jumping in the future.
+This operation declares the count + 1 of used variables in the vm. E. g. [DATA, 3] would reserve 3 variables with the addresses 1, 2, 3. The address 0 is a special address that will be used for jumping in the future.
 
 === [HALT, argument]
 
@@ -29,8 +25,7 @@ argument: 8 bit integer
 
 stack: no changes
 
-THis operation stops the execution of the vm immediately with return code
-that is specified by argument.
+THis operation stops the execution of the vm immediately with return code that is specified by argument.
   
 === [READ_INT]
 
@@ -40,8 +35,7 @@ stack:
   before: []
   after: [integer]
 
-This operation reads an 32 bit integer from the stdin device and pushes it
-to the stack.
+This operation reads an 32 bit integer from the stdin device and pushes it to the stack.
   
 === [WRITE_INT]
 
@@ -51,8 +45,7 @@ stack:
   before: [integer]
   after: []
   
-This operation pops a 32 bit integer from the stack and outputs it to the
-stdout device
+This operation pops a 32 bit integer from the stack and outputs it to the stdout device
 
 === [STORE, argument]
 
@@ -62,8 +55,7 @@ stack:
   before: [integer]
   after: []
   
-This operation pops a 32 bit integer value from the stack and stores it in the
-variable space that is passed (argument).
+This operation pops a 32 bit integer value from the stack and stores it in the variable space that is passed (argument).
 
 === [JMP_FALSE, argument]
 
@@ -73,9 +65,7 @@ stack:
   before: [integer]
   after: []
   
-This operation pops a 32 bit integer value from the stack and checks it. If the
-value is equal to 0 the vm will jump to the new instruction pointer that was 
-passed with the operation, otherwise it will ignore the jump.
+This operation pops a 32 bit integer value from the stack and checks it. If the value is equal to 0 the vm will jump to the new instruction pointer that was passed with the operation, otherwise it will ignore the jump.
 
 === [GOTO, argument]
 
@@ -85,7 +75,7 @@ stack: no changes
 
 This operation moves the instruction pointer to the passed position.
 
-=== [LD_INT, argument] # Put integer on the stack
+=== [LD_INT, argument]
 
 argument: 32 bit integer value
 
@@ -113,8 +103,7 @@ stack:
   before: [integer2, integer1]
   after: [integer]
   
-Checks if the integer1 is lower than integer2 and pushes a 1 to the stack if
-the expression is true or a 0 if it is false.
+Checks if the integer1 is lower than integer2 and pushes a 1 to the stack if the expression is true or a 0 if it is false.
 
 === [EQ]
 
@@ -124,8 +113,7 @@ stack:
   before: [integer2, integer1]
   after: [integer]
   
-Checks if the integer1 is equal to integer2 and pushes a 1 to the stack if
-the expression is true or a 0 if it is false.
+Checks if the integer1 is equal to integer2 and pushes a 1 to the stack if the expression is true or a 0 if it is false.
 
 === [GT]
 
@@ -135,8 +123,7 @@ stack:
   before: [integer2, integer1]
   after: [integer]
   
-Checks if the integer1 is grater then integer2 and pushes a 1 to the stack if
-the expression is true or a 0 if it is false.
+Checks if the integer1 is grater then integer2 and pushes a 1 to the stack if the expression is true or a 0 if it is false.
 
 === [ADD]
 
@@ -156,8 +143,7 @@ stack:
   before: [integer2, integer1]
   after: [integer]
   
-Substracts the integer1 and integer2 (integer1 - integer2) and pushes the 
-result onto the stack.
+Substracts the integer1 and integer2 (integer1 - integer2) and pushes the result onto the stack.
 
 === [MULT]
 
@@ -187,7 +173,4 @@ stack:
   before: [integer2, integer1]
   after: [integer]
   
-Powers the integer1 by the value of integer2 and pushes the result onto the 
-stack.
-
-
+Powers the integer1 by the value of integer2 and pushes the result onto the stack.
