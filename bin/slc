@@ -1,0 +1,19 @@
+#!/usr/bin/ruby
+$LOAD_PATH.unshift File.join(File.dirname(__FILE__), "..", "lib")
+require "rubygems"
+require "simplevm"
+
+if ARGV.empty?
+  STDERR.puts "usage: #{$0} {<source-files>}"
+else
+  ARGV.each do |file|
+    if File.exists? file
+      code = File.read(file)    
+      File.open(File.basename(file) + "c", "w") do |f|
+        f.write ByteCodeCompiler.compile(code)
+      end
+    else
+      STDERR.puts "Error: the file '#{file}' could not be found!"
+    end
+  end
+end

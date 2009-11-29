@@ -32,9 +32,11 @@ class VirtualMachine
     
     @exit_value
   rescue => ex
-    ex.code = code
-    ex.vm = self
-    ex.instuction_pointer = instuction_pointer
+    if ex.respond_to? :code
+      ex.code = code
+      ex.vm = self
+      ex.instuction_pointer = instuction_pointer
+    end
     raise ex
   end
   
@@ -55,9 +57,9 @@ class VirtualMachine
         @halt = true
         @exit_value = argument
       when :READ_INT
-        @stack << self.input()
+        @stack << input()
       when :WRITE_INT
-        self.output(stack_last)
+        output(stack_last)
       when :STORE
         @variables[argument] = stack_last
       when :JMP_FALSE

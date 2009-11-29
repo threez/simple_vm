@@ -1,0 +1,17 @@
+#!/usr/bin/ruby
+$LOAD_PATH.unshift File.join(File.dirname(__FILE__), "..", "lib")
+require "rubygems"
+require "simplevm"
+
+if ARGV.empty?
+  STDERR.puts "usage: #{$0} {<bytecode-file>}"
+else
+  file = ARGV.shift
+  if File.exists? file
+    program = SimpleByteCode.parse(file)
+    vm = VirtualMachine.new
+    vm.compute(program)
+  else
+    STDERR.puts "Error: the file '#{file}' could not be found!"
+  end
+end

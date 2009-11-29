@@ -9,3 +9,6 @@ require "simplevm/mock_vm"
 
 # compiler
 require "simplevm/compiler"
+
+# bytecode parser
+require "simplevm/bytecode"

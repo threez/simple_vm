@@ -29,11 +29,11 @@ namespace :compile do
 
   desc "compile the c vm"
   task :vm do
-    sh "gcc src/slvm.c -W -O2 -o slvm"
+    sh "gcc src/slvm.c -W -O2 -o bin/slvm_c"
   end
 
   desc "compile the c vm with debugging"
   task :vm_debug do
-    sh "gcc src/slvm.c -W -g -o slvm -DDEBUG"
+    sh "gcc src/slvm.c -W -g -o bin/slvm_c_debug -DDEBUG"
   end
 end
