@@ -21,7 +21,68 @@
 #define GT        211
 #define EQ        212
 
-#define STACK_SIZE 10
+#define STACK_SIZE 100
+
+// function, that helps debugging the virtual machine
+const char * opcode_to_str(int opcode) {
+  char * opcode_str = NULL;
+  
+  switch(opcode) {
+    case DATA:
+      opcode_str = "DATA";
+      break;
+    case HALT:
+      opcode_str = "HALT";
+      break;
+    case READ_INT:
+      opcode_str = "READ_INT";
+      break;
+    case WRITE_INT:
+      opcode_str = "WRITE_INT";
+      break;
+    case ADD:
+      opcode_str = "ADD";
+      break;
+    case SUB:
+      opcode_str = "SUB";
+      break;
+    case MULT:
+      opcode_str = "MULT";
+      break;
+    case DIV:
+      opcode_str = "DIV";
+      break;
+    case PWR:
+      opcode_str = "PWR";
+      break;
+    case STORE:
+      opcode_str = "STORE";
+      break;
+    case LD_INT:
+      opcode_str = "LD_INT";
+      break;
+    case LD_VAR:
+      opcode_str = "LD_VAR";
+      break;
+    case JMP_FALSE:
+      opcode_str = "JMP_FALSE";
+      break;
+    case GOTO:
+      opcode_str = "GOTO";
+      break;
+    case LT:
+      opcode_str = "LT";
+      break;
+    case GT:
+      opcode_str = "GT";
+      break;
+    case EQ:
+      opcode_str = "EQ";
+      break;
+  }
+  
+  return opcode_str;
+}
 
 // read a 4 byte integer in network byte order
 int read_int(FILE* code_file) {
@@ -51,83 +112,114 @@ void stack_new(struct Stack * stack) {
 }
 
 void stack_push(struct Stack * stack, int value) {
-  //printf("Stack(%i): push %i\n", stack->stack_pointer, value);
+#ifdef DEBUG
+  printf(" stack push <- %i (pointer %i + 1)\n", value, stack->stack_pointer);
+#endif
   stack->stack[stack->stack_pointer] = value;
   stack->stack_pointer++;
+#ifdef DEBUG
+  stack_print(stack);
+#endif
 }
 
 int stack_pop(struct Stack * stack) {
   int ret_val = stack->stack[stack->stack_pointer - 1];
-  //printf("Stack(%i): pop %i\n", stack->stack_pointer, ret_val);
+#ifdef DEBUG
+  printf(" stack pop -> %i (pointer %i - 1)\n", ret_val, stack->stack_pointer);
+#endif
   stack->stack[stack->stack_pointer - 1] = -1; // clear current item
   stack->stack_pointer--;
+#ifdef DEBUG
+  stack_print(stack);
+#endif
   return ret_val;
 }
 
+void stack_print(struct Stack * stack) {
+  int i;
+  if (stack->stack_pointer > 0) {
+    puts(" stack frame: ");
+    for (i = stack->stack_pointer - 1 ; i >= 0; i--)
+      printf("   %i: %i\n", i, stack->stack[i]);
+  } else {
+      puts(" stack is empty");
+  }
+}
+
 int main(int argc, char* argv[]) {
+#ifdef DEBUG
+  puts("Simple VM v0.2 starting");
+#endif
   FILE* code_file = NULL;
-  int opcode;
-  int argument;
+  int opcode, argument;
   int halt = -1;
   struct Instruction program[30];
   int program_pointer = 0, new_program_pointer;
-  int program_size = 0;
-  int* variables;
+  int program_size = 0, num_of_variables;
+  int* variables = NULL;
   int r1, r2;
   struct Stack stack;
   stack_new(&stack);
 
   if (argc > 1) {
     /* ==== read program code ==== */
+#ifdef DEBUG
+    puts(" * reading programm code");
+#endif
     code_file = fopen(argv[1], "r");
+#ifdef DEBUG
+    printf(" * open file '%s'\n", argv[1]);
+#endif
     while(!feof(code_file)) {
-      opcode = fgetc(code_file);
-    
+      opcode = fgetc(code_file);    
       program[program_pointer].opcode = opcode;
       program[program_pointer].argument = -1;
       switch(opcode) {
-        case DATA:
-          argument = read_int(code_file);
-          program[program_pointer].argument = argument;
-          break;
         case HALT:
           argument = fgetc(code_file);
           program[program_pointer].argument = argument;
           break;
+        case DATA:
         case STORE:
-          argument = read_int(code_file);
-          program[program_pointer].argument = argument;
-          break;
         case LD_INT:
-          argument = read_int(code_file);
-          program[program_pointer].argument = argument;
-          break;
         case LD_VAR:
-          argument = read_int(code_file);
-          program[program_pointer].argument = argument;
-          break;
         case JMP_FALSE:
-          argument = read_int(code_file);
-          program[program_pointer].argument = argument;
-          break;
         case GOTO:
           argument = read_int(code_file);
           program[program_pointer].argument = argument;
           break;
-      };
+      };    
+#ifdef DEBUG
+      if (opcode != -1)
+        printf("%s %d\n", opcode_to_str(opcode), argument);
+#endif
       program_pointer++;
     }
     fclose(code_file);
+#ifdef DEBUG
+    puts(" * file read and closed");
+#endif
     program_size = program_pointer;
 
     /* ==== act as vm ==== */
     program_pointer = 0; // start from 0
-    while ( program_pointer < program_size - 1 && halt == -1) {
+#ifdef DEBUG
+    puts(" * start programm");
+#endif
+    // first instruction (DATA hold cound of variables)
+    num_of_variables = program[program_pointer].argument;
+    while (program_pointer < program_size - 1 && halt == -1) {
       new_program_pointer = -1;
+
+#ifdef DEBUG
+      printf(" %05d: %s %d\n", program_pointer, 
+                           opcode_to_str(program[program_pointer].opcode),
+                           program[program_pointer].argument);
+#endif
 
       switch(program[program_pointer].opcode) {
         case DATA:
-          variables = (int*)malloc(sizeof(int) * program[program_pointer].argument + 1);
+          variables = (int*)malloc(sizeof(int) * num_of_variables);
           break;
         case HALT:
           halt = program[program_pointer].argument;
@@ -204,7 +296,10 @@ int main(int argc, char* argv[]) {
         program_pointer = new_program_pointer;
     }
   } else {
-    printf("usage: %s <simple-language.slc>", argv[0]);
+#ifdef DEBUG  
+    puts(" ! no programm specified, vm will end");
+#endif
+    printf("usage: %s <simple-language.slc>\n", argv[0]);
   }
 
   return halt;

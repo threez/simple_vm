@@ -31,4 +31,9 @@ namespace :compile do
   task :vm do
     sh "gcc src/slvm.c -W -O2 -o slvm"
   end
+
+  desc "compile the c vm with debugging"
+  task :vm_debug do
+    sh "gcc src/slvm.c -W -g -o slvm -DDEBUG"
+  end
 end
