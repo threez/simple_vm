@@ -7,6 +7,27 @@ implementing virtual machines and programming languages.
 
 The virtual machine is implemented as a stack-full vm that has an additional ram to store variable values that are addressable by 32 bit integers.
 
+== Simple Language
+
+A language that only deals with 4 byte integers. The language supports loops and conditions. Here is a simple example, the calculation of the fibonacci sequence.
+
+	declarations 
+	  integer i1, i2, n, s1. 
+	begin 
+	  read n;
+	  i1 := 0;
+	  i2 := 1;
+	  while n > 0 do
+	    s1 := i1;
+	    i1 := i2;
+	    i2 := s1 + i2;
+	    n := n - 1;
+	  end;
+	  write i1;
+	end
+	
+The *read* and *write* functions help to read and write to the console.
+
 == Virtual Machine Instruction Set
 
 The vm has a simple instruction set that can read and write integers and simple math and program flow mechanisms.
