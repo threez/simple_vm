@@ -1,10 +1,10 @@
 grammar SimpleLanguage
   rule program
     spaces 
-		'declarations' spaces declarations:declarations? spaces 
-		'begin' spaces commands spaces 
-		'end'
-		spaces <ProgramNode>
+    'declarations' spaces declarations:declarations? spaces 
+    'begin' spaces commands spaces 
+    'end'
+    spaces <ProgramNode>
   end
   
   rule declarations
@@ -24,46 +24,46 @@ grammar SimpleLanguage
     identifier spaces ':=' spaces additive <AssignmentNode>
   end
 
-	rule if_then_else_condition
+  rule if_then_else_condition
     'if' spaces expression spaces 
-		'then'? spaces then_commands:commands spaces
-		'else' spaces else_commands:commands spaces
-		'end' <IfThenElseConditionNode>
-	end
+    'then'? spaces then_commands:commands spaces
+    'else' spaces else_commands:commands spaces
+    'end' <IfThenElseConditionNode>
+  end
   
   rule if_then_condition
     'if' spaces expression spaces 
-		'then'? spaces commands spaces 
-		'end' <IfThenConditionNode>
+    'then'? spaces commands spaces 
+    'end' <IfThenConditionNode>
   end
 
-	rule condition
-		if_then_else_condition / if_then_condition
-	end
+  rule condition
+    if_then_else_condition / if_then_condition
+  end
   
   rule while_loop
     'while' spaces expression spaces 
-		'do'? spaces commands spaces 
-		'end' <WhileNode>
+    'do'? spaces commands spaces 
+    'end' <WhileNode>
   end
   
   rule command
     'skip' <ReadCommandNode> / 
-		'read' spaces identifier <ReadCommandNode> / 
-		'write' spaces additive <WriteCommandNode> / 
-		'exit' spaces number <ExitCommandNode> / 
-		assignment / 
-		condition / 
-		while_loop
+    'read' spaces identifier <ReadCommandNode> / 
+    'write' spaces additive <WriteCommandNode> / 
+    'exit' spaces number <ExitCommandNode> / 
+    assignment / 
+    condition / 
+    while_loop
   end
 
-	rule spaces
-		[\s]*
-	end
+  rule spaces
+    [\s]*
+  end
   
   rule number
     '0' <NumberNode> / 
-		[1-9] [0-9]* <NumberNode> 
+    [1-9] [0-9]* <NumberNode> 
   end
   
   rule identifier
@@ -85,6 +85,6 @@ grammar SimpleLanguage
   end
 
   rule expression
-		first_expression:additive spaces [<=>] spaces second_expression:additive <ExpressionNode>
+    first_expression:additive spaces [<=>] spaces second_expression:additive <ExpressionNode>
   end
 end

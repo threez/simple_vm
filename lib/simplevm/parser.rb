@@ -1400,4 +1400,3 @@ end
 class SimpleLanguageParser < Treetop::Runtime::CompiledParser
   include SimpleLanguage
 end
-
